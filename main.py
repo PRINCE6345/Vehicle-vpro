@@ -64,22 +64,39 @@ async def check_join_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             "❌ *Abhi Join Nahi Kiya!*\n\nPehle channel join karo phir try karo.",
             reply_markup=InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
+        data = response.json()
+        logger.info(f"API Response: {data}")
+
+        # Handle nested structure like {"VEHICLE_NUMBER": {"success": true, "vehicle": "...", "mobile": "..."}}
+        inner = None
+        if isinstance(data, dict):
+            for key in data:
+                if isinstance(data[key], dict):
+                    inner = data[key]
+                    break
+
+        if inner is None:
+            inner = data
+
+        success = inner.get("success", False)
+
+        if not success:
+            await msg.edit_text("❌ *No Result Found*\n\nValid vehicle number bhejo.\n\n🔥 *Made by PRINCE*", parse_mode="Markdown")
+            return
+
+        veh_num = inner.get("vehicle") or inner.get("vehicle_number") or inner.get("reg_no") or vehicle_no
+        phone = inner.get("mobile") or inner.get("phone") or inner.get("mobile_no") or "Not Found"
+
+        result = (
+            f"🚗 *Vehicle Lookup Result*\n"
+            f"━━━━━━━━━━━━━━\n"
+            f"🔢 *Vehicle No:* `{veh_num}`\n"
+            f"📞 *Phone No:* `{phone}`\n"
+            f"━━━━━━━━━━━━━━\n"
+            f"🔥 *Made by PRINCE*"
         )
 
-async def lookup_vehicle(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    is_member = await check_member(user_id, context)
-
-    if not is_member:
-        keyboard = [[InlineKeyboardButton("📢 Join Channel", url=CHANNEL_LINK)],
-                    [InlineKeyboardButton("✅ Joined! Continue", callback_data="check_join")]]
-        await update.message.reply_text(
-            "⚠️ Pehle channel join karo!",
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-        return
-
-    vehicle_no = update.message.text.strip().upper()
+        await msg.edit_text(result, parse_mode="Markdown")
     msg = await update.message.reply_text("🔍 Searching...")
 
     try:
