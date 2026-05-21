@@ -6,7 +6,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+BOT_TOKEN = "8996859662:AAESV9bvxt3ub7ChOZzQisSPaCUk1oIyESM"
 CHANNEL_USERNAME = "@princexhitmanmods"
 CHANNEL_LINK = "https://t.me/princexhitmanmods"
 API_KEY = "1WEEK_DEMO_ROOTX_INDIA"
